@@ -35,3 +35,7 @@ if __name__ == "__main__":
 # http://hplgit.github.io/web4sciapps/doc/pub/._web4sa_flask017.html#___sec64
 # https://realpython.com/blog/python/flask-by-example-updating-the-ui/
 # http://hplgit.github.io/parampool/doc/pub/._pp003.html
+# http://stackoverflow.com/questions/36288134/plotly-offline-with-flask
+# http: // stackoverflow.com / questions / 37912260 / plotting - graph - using - python - and -dispaying - it - using - html
+# https: // github.com / plotly / plotlyjs - flask - example
+# https: // github.com / plotly / dash
