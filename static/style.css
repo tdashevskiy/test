@@ -55,7 +55,7 @@ ul.tab li a:focus, .active {
     height:     100%;
     width:      100%;
     background: rgba( 255, 255, 255, .8 )
-                url('spinner.gif')
+                url('Loader.gif')
                 50% 50%
                 no-repeat;
 }

@@ -1,3 +1,15 @@
+function getParameterByName(name, url) {
+    if (!url) {
+      url = window.location.href;
+    }
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+};
+
 window.onresize = function() {
     gd = Plotly.d3.select('#Tab2-contents > div').node();
     if ( gd ){
@@ -69,6 +81,10 @@ $(document).ready(function() {
         $('#form').submit();
         return false;
     });
+
+    if ( getParameterByName( 'filename' ) ){
+        alert( 'File ' + getParameterByName('filename') + ' uploaded' );
+    }
 });
 
 function getKSDist( inpt ){
@@ -97,7 +113,8 @@ function getKSDist( inpt ){
 function buildModel(){
     $.getJSON( $SCRIPT_ROOT + '/_buildModel', {
     }, function( data ){
-        alert( 'Accuracy score: ' + data.score )
+        alert( 'Accuracy score: ' + data.score );
+        $( '#tree' ).empty();
         $('<img src="static/Clf.png">').load(function() {
             $(this).width('3000px').appendTo('#tree');
         });
@@ -108,8 +125,9 @@ function buildModel(){
 
 function predict( input ){
     $.getJSON( $SCRIPT_ROOT + '/_predict', {
-        file: input
+        filename: input
     }, function( data ){
+        $( '#predictResult' ).empty();
         $( '#predictResult' ).append( data.result );
         $body.removeClass("loading");
     })

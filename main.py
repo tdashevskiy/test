@@ -49,17 +49,17 @@ def upload():
             filename = secure_filename( file.filename )
             file.save( os.path.join( app.config[ 'UPLOAD_FOLDER' ], filename ) )
             flash( 'File uploaded!' )
-            # return redirect( url_for( 'uploaded_file', filename=filename ) )
+            return redirect( url_for( 'index', filename = filename ) )
     return
 
 
 @app.route('/_predict')
 def _predict() :
-    inputdata = np.loadtxt( os.path.join( app.config[ 'UPLOAD_FOLDER' ], request.args['file'] ) )
+    inputdata = np.loadtxt( os.path.join( app.config[ 'UPLOAD_FOLDER' ], request.args[ 'filename' ] ) )
 
     global classifier
-    clf = classifier
-    Predicted_Crop = clf.predict(inputdata).tolist()
+
+    Predicted_Crop = classifier.predict(inputdata).tolist()
 
     dictionary = { 1: 'Corn', 0: 'Not corn' }
     res = map( lambda flag: dictionary[ flag ] + ' ', Predicted_Crop )
@@ -182,23 +182,23 @@ def getKSDist( ) :
     return xii, yii, pdfxyi
 
 
-@app.route("/", methods=['GET', 'POST'])
+@app.route( "/", methods = [ 'GET', 'POST' ] )
 def index():
-    graphs = []
-    ids = ['Tab{}Content'.format(i) for i, _ in enumerate(graphs)]
+    fn = ''
+    if request.args and request.args[ 'filename' ] :
+        fn = request.args[ 'filename' ]
 
-    return render_template('index.html',
-                           ids = ids
-                           )
+    return render_template( 'index.html'
+                            , uploaded = fn
+                            )
 
 
-if __name__ == "__main__":
-    app.run( debug = True, use_reloader = True)
-    #app.run(host='0.0.0.0', port=9999)
+if __name__ == "__main__" :
+    app.run( debug = True, use_reloader = True )
+    #app.run( host = '0.0.0.0', port = 9999 )
 
 # https://stormpath.com/blog/build-a-flask-app-in-30-minutes
 # http://hplgit.github.io/web4sciapps/doc/pub/._web4sa_flask017.html#___sec64
 # https://realpython.com/blog/python/flask-by-example-updating-the-ui/
 # http://hplgit.github.io/parampool/doc/pub/._pp003.html
 # https://codepen.io/plotly/pres/wKpPvj
-
