@@ -68,7 +68,7 @@ $(document).ready(function() {
     });
 
     $( '#predict' ).bind( 'click', function(){
-        predict('miniset.txt');
+        predict();
         return false;
     });
 
@@ -123,9 +123,8 @@ function buildModel(){
     })
 };
 
-function predict( input ){
+function predict(){
     $.getJSON( $SCRIPT_ROOT + '/_predict', {
-        filename: input
     }, function( data ){
         $( '#predictResult' ).empty();
         $( '#predictResult' ).append( data.result );

@@ -27,6 +27,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = 'some_secret'
 
 classifier = None
+filename = None
+inputdata = None
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -34,6 +36,7 @@ def allowed_file(filename):
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
+    global filename
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -46,16 +49,19 @@ def upload():
             flash('No selected file')
             return redirect( request.url )
         if file and allowed_file( file.filename ) :
-            filename = secure_filename( file.filename )
-            file.save( os.path.join( app.config[ 'UPLOAD_FOLDER' ], filename ) )
+            fname = secure_filename( file.filename )
+            filename = fname
+            file.save( os.path.join( app.config[ 'UPLOAD_FOLDER' ], fname ) )
             flash( 'File uploaded!' )
-            return redirect( url_for( 'index', filename = filename ) )
+            return redirect( url_for( 'index', filename = fname ) )
     return
 
 
 @app.route('/_predict')
 def _predict() :
-    inputdata = np.loadtxt( os.path.join( app.config[ 'UPLOAD_FOLDER' ], request.args[ 'filename' ] ) )
+    global inputdata
+    global filename
+    inputdata = np.loadtxt( os.path.join( app.config[ 'UPLOAD_FOLDER' ], filename ) )
 
     global classifier
 
@@ -103,7 +109,8 @@ def classify() :
                                     feature_names=col_headers[3:],
                                     class_names=np.asarray(['corn', 'not corn']),
                                     filled=True, rounded=True,
-                                    special_characters=True)
+                                    special_characters=True,
+                                    proportion=True)
 
     graph = pydotplus.graph_from_dot_file( os.path.join( app.root_path, 'temp/Clf.dot' ) )
     pathToWrite = os.path.join(app.root_path, 'static/Clf.png')
@@ -123,16 +130,37 @@ def _getKSDist( ) :
     y = res[1]
     z = res[2]
 
-    surface = go.Surface(x=x, y=y, z=z)
-    data = go.Data([surface])
+    print inputdata
+
+    xp = inputdata[:, 0]
+    yp = inputdata[:, 12]
+    zp = 0.*inputdata[:, 0]
+
+
+    surface = go.Surface(x=x, y=y, z=z, opacity=0.95)
+    scatter = go.Scatter3d(
+        x=xp,
+        y=yp,
+        z=zp,
+        mode='markers',
+        marker=dict(
+            size=6,
+            line=dict(
+                color='rgba(217, 217, 217, 0.14)',
+                width=0.5
+            ),
+            opacity=0.8
+        )
+    )
+
     layout = go.Layout(
         scene=go.Scene(
-            xaxis=dict(range=[100, 350]),
-            yaxis=dict(range=[-0.2, 0.2])
+            xaxis=dict(title='Day of the Year', range=[100, 350]),
+            yaxis=dict(title='Veg Index Rate of Change ',range=[-0.2, 0.2])
         ),
         title='Probability Density of Vegetative Index vs. Day of the Year'
     )
-    fig = go.Figure(data=data, layout=layout)
+    fig = go.Figure(data=[surface, scatter], layout=layout)
 
     KSDist = plot(
         fig
